@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document Transmittal Log</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23242220'/%3E%3Cpath d='M18 12h20a3 3 0 0 1 3 3v34l-6-4-6 4-6-4-6 4-6-4-6 4V15a3 3 0 0 1 3-3z' fill='%232E6E5A'/%3E%3Cpath d='M23 22h18M23 29h18M23 36h12' stroke='%23F5F2EA' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F2EA;
+    --paper-2:#EDE8DA;
+    --ink:#242220;
+    --ink-soft:#6B655C;
+    --ink-faint:#A39C8F;
+    --line:#D8D0C0;
+    --line-strong:#C2B8A3;
+    --teal:#2E6E5A;
+    --teal-dark:#1E4B3D;
+    --teal-tint:#DCEBE4;
+    --amber:#C1651E;
+    --amber-dark:#8C4A15;
+    --amber-tint:#F6E3CE;
+    --red:#B3402C;
+    --red-dark:#7A2B1D;
+    --red-tint:#F5DFDA;
+    --card:#FFFFFE;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px;margin:0 auto;padding:36px 28px 80px;}
+
+  .header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--ink);padding-bottom:20px;margin-bottom:28px;flex-wrap:wrap;gap:16px;}
+  .header-left .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-dark);font-weight:600;margin-bottom:6px;}
+  .header-left h1{font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:700;margin:0;letter-spacing:-.01em;}
+  .header-right .clock{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px 18px;position:relative;overflow:hidden;}
+  .stat::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--stat-color,var(--ink));}
+  .stat .label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px;}
+  .stat .value{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;line-height:1;}
+  .stat .sub{font-size:12px;color:var(--ink-faint);margin-top:6px;}
+
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:20px;}
+  .toolbar input[type=text], .toolbar select{font-family:'IBM Plex Sans',sans-serif;font-size:13.5px;padding:9px 12px;border:1px solid var(--line-strong);border-radius:5px;background:var(--card);color:var(--ink);}
+  .toolbar input[type=text]{flex:1;min-width:180px;}
+  .toolbar select{min-width:150px;}
+  .spacer{flex:1;}
+  .btn{font-family:'IBM Plex Sans',sans-serif;font-size:13.5px;font-weight:500;padding:9px 16px;border-radius:5px;border:1px solid var(--line-strong);background:var(--card);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:transform .08s ease, background .12s ease;}
+  .btn:hover{background:var(--paper-2);}
+  .btn:active{transform:scale(.97);}
+  .btn-primary{background:var(--teal);border-color:var(--teal);color:#fff;}
+  .btn-primary:hover{background:var(--teal-dark);}
+  .btn-ghost{border-color:transparent;background:transparent;color:var(--ink-soft);}
+  .btn-ghost:hover{background:var(--paper-2);}
+  .btn-small{padding:6px 10px;font-size:12px;}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:22px 24px;margin-bottom:26px;display:none;}
+  .panel.open{display:block;}
+  .panel h2{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;margin:0 0 16px;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;}
+  .form-grid .full{grid-column:1/-1;}
+  .field label{display:block;font-size:11.5px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;}
+  .field input, .field textarea, .field select{width:100%;font-family:'IBM Plex Sans',sans-serif;font-size:13.5px;padding:9px 11px;border:1px solid var(--line-strong);border-radius:5px;background:var(--paper);color:var(--ink);}
+  .field textarea{resize:vertical;min-height:60px;font-family:inherit;}
+  .field input:focus, .field textarea:focus, .field select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-tint);}
+  .panel-actions{display:flex;gap:10px;margin-top:18px;justify-content:flex-end;}
+
+  .ticket-list{display:flex;flex-direction:column;gap:10px;}
+  .ticket{background:var(--card);border:1px solid var(--line);border-radius:8px;display:grid;grid-template-columns:64px 1fr auto;gap:0;position:relative;overflow:hidden;}
+  .ticket-id{background:var(--paper-2);border-right:1px dashed var(--line-strong);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;}
+  .ticket-id .hole{width:9px;height:9px;border-radius:50%;background:var(--paper);border:1px solid var(--line-strong);margin-bottom:8px;}
+  .ticket-id .num{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--ink-soft);writing-mode:vertical-rl;text-orientation:mixed;}
+  .ticket-body{padding:14px 18px;min-width:0;}
+  .ticket-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+  .ticket-brand{font-family:'Space Grotesk',sans-serif;font-size:15.5px;font-weight:600;}
+  .badge{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:20px;}
+  .badge-type{background:var(--paper-2);color:var(--ink-soft);border:1px solid var(--line-strong);}
+  .badge-status-pending{background:var(--amber-tint);color:var(--amber-dark);}
+  .badge-status-done{background:var(--teal-tint);color:var(--teal-dark);}
+  .ticket-desc{font-size:13.5px;color:var(--ink);line-height:1.5;margin-bottom:8px;white-space:pre-line;}
+  .ticket-meta{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);}
+  .ticket-meta span{display:flex;align-items:center;gap:5px;}
+  .ticket-meta b{color:var(--ink);font-weight:500;}
+  .ticket-reco{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--teal-dark);}
+  .ticket-reco b{font-weight:600;}
+  .ticket-actions{display:flex;flex-direction:column;gap:6px;padding:14px 14px 14px 0;align-items:flex-end;justify-content:center;}
+  .icon-btn{width:30px;height:30px;border-radius:5px;border:1px solid var(--line-strong);background:var(--card);color:var(--ink-soft);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .icon-btn:hover{background:var(--paper-2);color:var(--ink);}
+  .icon-btn.danger:hover{background:var(--red-tint);color:var(--red-dark);border-color:var(--red);}
+
+  .empty{text-align:center;padding:60px 20px;color:var(--ink-soft);border:1px dashed var(--line-strong);border-radius:8px;background:var(--card);}
+  .empty .big{font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--ink);margin-bottom:6px;font-weight:600;}
+
+  .footnote{margin-top:26px;font-size:11.5px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;text-align:center;}
+
+  @media (max-width:640px){
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .form-grid{grid-template-columns:1fr;}
+    .ticket{grid-template-columns:40px 1fr;}
+    .ticket-actions{grid-column:1/-1;flex-direction:row;justify-content:flex-end;padding:0 14px 12px;}
+    .ticket-id .num{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-left">
+      <div class="eyebrow">IMSD &middot; document routing record</div>
+      <h1>Document Transmittal Log</h1>
+    </div>
+    <div class="header-right"><div class="clock" id="clock"></div></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat" style="--stat-color:var(--ink)">
+      <div class="label">Total documents</div>
+      <div class="value" id="stat-total">0</div>
+      <div class="sub">all-time logged</div>
+    </div>
+    <div class="stat" style="--stat-color:var(--amber)">
+      <div class="label">Awaiting receipt</div>
+      <div class="value" id="stat-pending">0</div>
+      <div class="sub">not yet received back</div>
+    </div>
+    <div class="stat" style="--stat-color:var(--teal)">
+      <div class="label">Received</div>
+      <div class="value" id="stat-done">0</div>
+      <div class="sub">confirmed received</div>
+    </div>
+    <div class="stat" style="--stat-color:var(--amber-dark)">
+      <div class="label">Avg. turnaround</div>
+      <div class="value" id="stat-avg">–</div>
+      <div class="sub">days, sent to received</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="Search particulars, office, or receiver...">
+    <select id="filter-type"><option value="">All offices</option></select>
+    <select id="filter-status">
+      <option value="">All statuses</option>
+      <option value="pending">Awaiting receipt</option>
+      <option value="done">Received</option>
+    </select>
+    <div class="spacer"></div>
+    <button class="btn btn-ghost btn-small" id="import-btn">Import CSV</button>
+    <input type="file" id="import-file" accept=".csv" style="display:none">
+    <button class="btn btn-ghost btn-small" id="export-btn">Export CSV</button>
+    <button class="btn btn-primary" id="new-btn">+ Log new document</button>
+  </div>
+
+  <div class="panel" id="form-panel">
+    <h2 id="form-title">Log new document</h2>
+    <div class="form-grid">
+      <div class="field full">
+        <label>Particulars</label>
+        <textarea id="f-particulars" placeholder="Document title, subject, property/serial no., etc."></textarea>
+      </div>
+      <div class="field">
+        <label>Forwarded to</label>
+        <input type="text" id="f-forwardedto" placeholder="e.g. IMSD / Procurement">
+      </div>
+      <div class="field">
+        <label>Remarks (on forwarding)</label>
+        <input type="text" id="f-remarks1" placeholder="e.g. For signature">
+      </div>
+      <div class="field">
+        <label>Date &amp; time forwarded</label>
+        <input type="datetime-local" id="f-datefwd">
+      </div>
+      <div class="field">
+        <label>Received by</label>
+        <input type="text" id="f-receivedby" placeholder="Name / initials">
+      </div>
+      <div class="field">
+        <label>Date &amp; time received <span style="text-transform:none;font-weight:400;">(leave blank if still pending)</span></label>
+        <input type="datetime-local" id="f-daterecv">
+      </div>
+      <div class="field full">
+        <label>Remarks (final)</label>
+        <textarea id="f-remarks2" placeholder="Any closing remarks"></textarea>
+      </div>
+    </div>
+    <div class="panel-actions">
+      <button class="btn btn-ghost" id="cancel-btn">Cancel</button>
+      <button class="btn btn-primary" id="save-btn">Save entry</button>
+    </div>
+  </div>
+
+  <div class="ticket-list" id="ticket-list"></div>
+  <div class="empty" id="empty-state" style="display:none;">
+    <div class="big">No documents yet</div>
+    <div>Log your first document to start tracking.</div>
+  </div>
+
+  <div class="footnote" id="footnote">Data saved automatically</div>
+</div>
+
+<script>
+let tickets = [];
+let editingId = null;
+
+function fmtDT(v){
+  if(!v) return '';
+  const d = new Date(v);
+  if(isNaN(d)) return v;
+  return d.toLocaleString('en-US',{month:'short',day:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function nowLocalISO(){
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0,16);
+}
+function updateClock(){
+  document.getElementById('clock').textContent = new Date().toLocaleString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+updateClock();
+setInterval(updateClock, 30000);
+
+const hasCloudStorage = (typeof window.storage !== 'undefined' && window.storage && typeof window.storage.get === 'function');
+const LOCAL_KEY = 'doc_transmittal_log_v1';
+
+async function loadTickets(){
+  try{
+    if(hasCloudStorage){
+      const res = await window.storage.get('docs', true);
+      tickets = res && res.value ? JSON.parse(res.value) : [];
+    } else {
+      const raw = localStorage.getItem(LOCAL_KEY);
+      tickets = raw ? JSON.parse(raw) : [];
+    }
+  }catch(e){ tickets = []; }
+  render();
+}
+async function saveTickets(){
+  try{
+    if(hasCloudStorage){
+      await window.storage.set('docs', JSON.stringify(tickets), true);
+    } else {
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(tickets));
+    }
+  }catch(e){ console.error('Storage error', e); }
+}
+
+function genId(){
+  const n = tickets.length ? Math.max(...tickets.map(t=>t.seq||0)) + 1 : 1;
+  return { seq:n, id: 'DOC-' + String(n).padStart(4,'0') };
+}
+
+function openForm(t){
+  editingId = t ? t.id : null;
+  document.getElementById('form-title').textContent = t ? 'Edit entry ' + t.id : 'Log new document';
+  document.getElementById('f-particulars').value = t ? t.particulars : '';
+  document.getElementById('f-forwardedto').value = t ? t.forwardedTo : '';
+  document.getElementById('f-remarks1').value = t ? t.remarks1 : '';
+  document.getElementById('f-datefwd').value = t ? (t.dateFwd||'') : nowLocalISO();
+  document.getElementById('f-receivedby').value = t ? t.receivedBy : '';
+  document.getElementById('f-daterecv').value = t ? (t.dateRecv||'') : '';
+  document.getElementById('f-remarks2').value = t ? (t.remarks2||'') : '';
+  document.getElementById('form-panel').classList.add('open');
+  document.getElementById('f-particulars').focus();
+}
+function closeForm(){
+  document.getElementById('form-panel').classList.remove('open');
+  editingId = null;
+}
+document.getElementById('new-btn').onclick = () => openForm(null);
+document.getElementById('cancel-btn').onclick = closeForm;
+
+document.getElementById('save-btn').onclick = async () => {
+  const particulars = document.getElementById('f-particulars').value.trim();
+  const forwardedTo = document.getElementById('f-forwardedto').value.trim();
+  if(!particulars || !forwardedTo){
+    alert('Please fill in at least Particulars and Forwarded To.');
+    return;
+  }
+  const data = {
+    particulars,
+    forwardedTo,
+    remarks1: document.getElementById('f-remarks1').value.trim(),
+    dateFwd: document.getElementById('f-datefwd').value || '',
+    receivedBy: document.getElementById('f-receivedby').value.trim(),
+    dateRecv: document.getElementById('f-daterecv').value || '',
+    remarks2: document.getElementById('f-remarks2').value.trim()
+  };
+  if(editingId){
+    const idx = tickets.findIndex(t=>t.id===editingId);
+    if(idx>-1) tickets[idx] = {...tickets[idx], ...data};
+  } else {
+    const {seq,id} = genId();
+    tickets.unshift({id, seq, ...data});
+  }
+  await saveTickets();
+  closeForm();
+  render();
+};
+
+async function deleteTicket(id){
+  if(!confirm("Delete this entry? This can't be undone.")) return;
+  tickets = tickets.filter(t=>t.id!==id);
+  await saveTickets();
+  render();
+}
+function editTicket(id){
+  const t = tickets.find(t=>t.id===id);
+  if(t) openForm(t);
+}
+
+function computeStats(list){
+  document.getElementById('stat-total').textContent = list.length;
+  const pending = list.filter(t=>!t.dateRecv).length;
+  const done = list.filter(t=>t.dateRecv).length;
+  document.getElementById('stat-pending').textContent = pending;
+  document.getElementById('stat-done').textContent = done;
+  const durations = list.filter(t=>t.dateRecv && t.dateFwd).map(t=>{
+    const d1 = new Date(t.dateFwd), d2 = new Date(t.dateRecv);
+    return Math.max(0, (d2-d1)/86400000);
+  });
+  const avg = durations.length ? (durations.reduce((a,b)=>a+b,0)/durations.length) : null;
+  document.getElementById('stat-avg').textContent = avg===null ? '–' : avg.toFixed(1);
+}
+
+function populateTypeFilter(list){
+  const sel = document.getElementById('filter-type');
+  const current = sel.value;
+  const types = [...new Set(list.map(t=>t.forwardedTo).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">All offices</option>' + types.map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+  sel.value = current;
+}
+function escapeHtml(s){
+  return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function render(){
+  populateTypeFilter(tickets);
+  const search = document.getElementById('search').value.toLowerCase();
+  const fType = document.getElementById('filter-type').value;
+  const fStatus = document.getElementById('filter-status').value;
+
+  let filtered = tickets.filter(t => {
+    if(fType && t.forwardedTo !== fType) return false;
+    if(fStatus === 'pending' && t.dateRecv) return false;
+    if(fStatus === 'done' && !t.dateRecv) return false;
+    if(search){
+      const hay = [t.particulars,t.forwardedTo,t.receivedBy,t.remarks1,t.remarks2].join(' ').toLowerCase();
+      if(!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  computeStats(tickets);
+
+  const list = document.getElementById('ticket-list');
+  const empty = document.getElementById('empty-state');
+  if(filtered.length === 0){
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    empty.querySelector('.big').textContent = tickets.length ? 'No matching entries' : 'No documents yet';
+    empty.querySelector('div:last-child').textContent = tickets.length ? 'Try adjusting your search or filters.' : 'Log your first document to start tracking.';
+    return;
+  }
+  empty.style.display = 'none';
+
+  list.innerHTML = filtered.map(t => {
+    const isDone = !!t.dateRecv;
+    return `
+    <div class="ticket">
+      <div class="ticket-id">
+        <div class="hole"></div>
+        <div class="num">${t.id}</div>
+      </div>
+      <div class="ticket-body">
+        <div class="ticket-top">
+          <span class="ticket-brand">${escapeHtml(t.forwardedTo)}</span>
+          ${t.remarks1 ? `<span class="badge badge-type">${escapeHtml(t.remarks1)}</span>` : ''}
+          <span class="badge ${isDone ? 'badge-status-done' : 'badge-status-pending'}">${isDone ? 'Received' : 'Awaiting receipt'}</span>
+        </div>
+        <div class="ticket-desc">${escapeHtml(t.particulars)}</div>
+        <div class="ticket-meta">
+          <span>Forwarded: <b>${fmtDT(t.dateFwd)}</b></span>
+          ${t.receivedBy ? `<span>Received by: <b>${escapeHtml(t.receivedBy)}</b></span>` : ''}
+          ${isDone ? `<span>Received: <b>${fmtDT(t.dateRecv)}</b></span>` : ''}
+        </div>
+        ${t.remarks2 ? `<div class="ticket-reco"><b>Remarks:</b> ${escapeHtml(t.remarks2)}</div>` : ''}
+      </div>
+      <div class="ticket-actions">
+        <button class="icon-btn" onclick="editTicket('${t.id}')" title="Edit" aria-label="Edit entry">&#9998;</button>
+        <button class="icon-btn danger" onclick="deleteTicket('${t.id}')" title="Delete" aria-label="Delete entry">&#128465;</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('search').oninput = render;
+document.getElementById('filter-type').onchange = render;
+document.getElementById('filter-status').onchange = render;
+
+function parseCSV(text){
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+  for(let i=0;i<text.length;i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; }
+        else { inQuotes = false; }
+      } else { field += c; }
+    } else {
+      if(c === '"'){ inQuotes = true; }
+      else if(c === ','){ row.push(field); field=''; }
+      else if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+      else if(c === '\r'){ }
+      else { field += c; }
+    }
+  }
+  if(field.length>0 || row.length>0){ row.push(field); rows.push(row); }
+  return rows.filter(r => !(r.length===1 && r[0].trim()===''));
+}
+function normalizeDateTime(str){
+  if(!str) return '';
+  str = str.trim();
+  if(!str) return '';
+  if(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(str)) return str.slice(0,16);
+  const d = new Date(str.replace(' & ',' ').replace('\n',' '));
+  if(!isNaN(d)){
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0,16);
+  }
+  return '';
+}
+
+document.getElementById('import-btn').onclick = () => document.getElementById('import-file').click();
+document.getElementById('import-file').onchange = async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  let text;
+  try{ text = await file.text(); }
+  catch(err){ alert('Could not read that file.'); e.target.value=''; return; }
+  const rows = parseCSV(text);
+  if(rows.length < 2){ alert('No data found in this CSV.'); e.target.value=''; return; }
+  const headers = rows[0].map(h => h.trim().toLowerCase());
+  const idx = {
+    particulars: headers.indexOf('particulars'),
+    forwardedTo: headers.indexOf('forwarded to'),
+    remarks1: headers.indexOf('remarks'),
+    dateFwd: headers.indexOf('date & time forwarded'),
+    receivedBy: headers.findIndex(h => h.includes('received by') || h.includes('recieved by')),
+    dateRecv: headers.indexOf('date & time received'),
+    remarks2: headers.lastIndexOf('remarks')
+  };
+  const dataRows = rows.slice(1).filter(r => r.length === headers.length);
+  const imported = [];
+  for(const r of dataRows){
+    const particularsVal = idx.particulars>-1 ? (r[idx.particulars]||'').trim() : '';
+    const forwardedToVal = idx.forwardedTo>-1 ? (r[idx.forwardedTo]||'').trim() : '';
+    if(!particularsVal && !forwardedToVal) continue;
+    imported.push({
+      particulars: particularsVal,
+      forwardedTo: forwardedToVal,
+      remarks1: idx.remarks1>-1 ? (r[idx.remarks1]||'').trim() : '',
+      dateFwd: idx.dateFwd>-1 ? normalizeDateTime(r[idx.dateFwd]) : '',
+      receivedBy: idx.receivedBy>-1 ? (r[idx.receivedBy]||'').trim() : '',
+      dateRecv: idx.dateRecv>-1 ? normalizeDateTime(r[idx.dateRecv]) : '',
+      remarks2: idx.remarks2>-1 ? (r[idx.remarks2]||'').trim() : ''
+    });
+  }
+  if(imported.length === 0){ alert('No valid entries were found in this file.'); e.target.value=''; return; }
+  if(!confirm(`Import ${imported.length} entr${imported.length===1?'y':'ies'} from this CSV? They will be added to your current log.`)){ e.target.value=''; return; }
+  imported.forEach(data => {
+    const {seq,id} = genId();
+    tickets.unshift({id, seq, ...data});
+  });
+  await saveTickets();
+  render();
+  alert(`Imported ${imported.length} entr${imported.length===1?'y':'ies'}.`);
+  e.target.value = '';
+};
+
+function buildCSV(){
+  const headers = ['Particulars','Forwarded To','Remarks','Date & Time Forwarded','Received By','Date & Time Received','Remarks','Status'];
+  const rows = tickets.map(t => [t.particulars,t.forwardedTo,t.remarks1,t.dateFwd,t.receivedBy,t.dateRecv,t.remarks2,(t.dateRecv?'Received':'Pending')]);
+  const pendingCount = tickets.filter(t=>!t.dateRecv).length;
+  const doneCount = tickets.filter(t=>t.dateRecv).length;
+  const summaryRows = [[],['Total documents', tickets.length],['Pending', pendingCount],['Received', doneCount]];
+  return [headers, ...rows, ...summaryRows].map(r => r.map(v => `"${String(v==null?'':v).replace(/"/g,'""')}"`).join(',')).join('\n');
+}
+
+function downloadCSV(auto){
+  const csv = buildCSV();
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const stamp = new Date().toISOString().slice(0,10);
+  a.download = (auto ? 'document-transmittal-log-auto-' : 'document-transmittal-log-') + stamp + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('export-btn').onclick = () => downloadCSV(false);
+
+const AUTO_EXPORT_HOUR = 18; // 6:00 PM, local time
+const AUTO_EXPORT_KEY = 'lastAutoExportDate';
+
+async function getLastAutoExportDate(){
+  try{
+    if(hasCloudStorage){
+      const res = await window.storage.get(AUTO_EXPORT_KEY, false);
+      return res && res.value ? res.value : '';
+    } else {
+      return localStorage.getItem(AUTO_EXPORT_KEY) || '';
+    }
+  }catch(e){ return ''; }
+}
+async function setLastAutoExportDate(dateStr){
+  try{
+    if(hasCloudStorage){
+      await window.storage.set(AUTO_EXPORT_KEY, dateStr, false);
+    } else {
+      localStorage.setItem(AUTO_EXPORT_KEY, dateStr);
+    }
+  }catch(e){ /* ignore */ }
+}
+
+async function checkAutoExport(){
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0,10);
+  if(now.getHours() < AUTO_EXPORT_HOUR) return;
+  const last = await getLastAutoExportDate();
+  if(last === todayStr) return;
+  if(tickets.length === 0) return;
+  downloadCSV(true);
+  await setLastAutoExportDate(todayStr);
+}
+setInterval(checkAutoExport, 60000);
+setTimeout(checkAutoExport, 3000);
+
+document.getElementById('footnote').textContent = (hasCloudStorage
+  ? 'Shared log — visible to everyone using this app · data saved automatically'
+  : 'Saved in this browser only · data saved automatically') + ' · auto-exports a CSV daily at 6:00 PM while this tab is open';
+
+loadTickets();
+</script>
+</body>
+</html>
