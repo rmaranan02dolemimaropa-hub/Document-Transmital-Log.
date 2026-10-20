@@ -9,23 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#F5F2EA;
-    --paper-2:#EDE8DA;
-    --ink:#242220;
-    --ink-soft:#6B655C;
-    --ink-faint:#A39C8F;
-    --line:#D8D0C0;
-    --line-strong:#C2B8A3;
-    --teal:#2E6E5A;
-    --teal-dark:#1E4B3D;
-    --teal-tint:#DCEBE4;
-    --amber:#C1651E;
-    --amber-dark:#8C4A15;
-    --amber-tint:#F6E3CE;
-    --red:#B3402C;
-    --red-dark:#7A2B1D;
-    --red-tint:#F5DFDA;
-    --card:#FFFFFE;
+    --paper:#F5F2EA;--paper-2:#EDE8DA;--ink:#242220;--ink-soft:#6B655C;--ink-faint:#A39C8F;
+    --line:#D8D0C0;--line-strong:#C2B8A3;--teal:#2E6E5A;--teal-dark:#1E4B3D;--teal-tint:#DCEBE4;
+    --amber:#C1651E;--amber-dark:#8C4A15;--amber-tint:#F6E3CE;--red:#B3402C;--red-dark:#7A2B1D;--red-tint:#F5DFDA;--card:#FFFFFE;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;-webkit-font-smoothing:antialiased;}
@@ -120,7 +106,7 @@
     <div class="stat" style="--stat-color:var(--ink)">
       <div class="label">Total documents</div>
       <div class="value" id="stat-total">0</div>
-      <div class="sub">all-time logged</div>
+      <div class="sub" id="sub-total">all-time logged</div>
     </div>
     <div class="stat" style="--stat-color:var(--amber)">
       <div class="label">Awaiting receipt</div>
@@ -142,6 +128,7 @@
   <div class="toolbar">
     <input type="text" id="search" placeholder="Search particulars, office, or receiver...">
     <select id="filter-type"><option value="">All offices</option></select>
+    <select id="filter-month"><option value="">All months</option></select>
     <select id="filter-status">
       <option value="">All statuses</option>
       <option value="pending">Awaiting receipt</option>
@@ -311,8 +298,9 @@ function editTicket(id){
   if(t) openForm(t);
 }
 
-function computeStats(list){
+function computeStats(list, monthLabel){
   document.getElementById('stat-total').textContent = list.length;
+  document.getElementById('sub-total').textContent = monthLabel ? 'forwarded in ' + monthLabel : 'all-time logged';
   const pending = list.filter(t=>!t.dateRecv).length;
   const done = list.filter(t=>t.dateRecv).length;
   document.getElementById('stat-pending').textContent = pending;
@@ -332,18 +320,34 @@ function populateTypeFilter(list){
   sel.innerHTML = '<option value="">All offices</option>' + types.map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
   sel.value = current;
 }
+function monthLabel(m){
+  const [y, mo] = m.split('-');
+  return new Date(+y, +mo - 1, 1).toLocaleString('en-US', {month:'long', year:'numeric'});
+}
+function populateMonthFilter(list){
+  const sel = document.getElementById('filter-month');
+  const current = sel.value;
+  const months = [...new Set(
+    list.map(t => (t.dateFwd || '').slice(0,7)).filter(m => /^\d{4}-\d{2}$/.test(m))
+  )].sort().reverse();
+  sel.innerHTML = '<option value="">All months</option>' + months.map(m => `<option value="${m}">${monthLabel(m)}</option>`).join('');
+  sel.value = months.includes(current) ? current : '';
+}
 function escapeHtml(s){
   return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 function render(){
   populateTypeFilter(tickets);
+  populateMonthFilter(tickets);
   const search = document.getElementById('search').value.toLowerCase();
   const fType = document.getElementById('filter-type').value;
+  const fMonth = document.getElementById('filter-month').value;
   const fStatus = document.getElementById('filter-status').value;
 
   let filtered = tickets.filter(t => {
     if(fType && t.forwardedTo !== fType) return false;
+    if(fMonth && (t.dateFwd || '').slice(0,7) !== fMonth) return false;
     if(fStatus === 'pending' && t.dateRecv) return false;
     if(fStatus === 'done' && !t.dateRecv) return false;
     if(search){
@@ -353,7 +357,9 @@ function render(){
     return true;
   });
 
-  computeStats(tickets);
+  // Stats follow the selected month; all-time when "All months"
+  const statList = fMonth ? tickets.filter(t => (t.dateFwd || '').slice(0,7) === fMonth) : tickets;
+  computeStats(statList, fMonth ? monthLabel(fMonth) : '');
 
   const list = document.getElementById('ticket-list');
   const empty = document.getElementById('empty-state');
@@ -398,6 +404,7 @@ function render(){
 
 document.getElementById('search').oninput = render;
 document.getElementById('filter-type').onchange = render;
+document.getElementById('filter-month').onchange = render;
 document.getElementById('filter-status').onchange = render;
 
 function parseCSV(text){
