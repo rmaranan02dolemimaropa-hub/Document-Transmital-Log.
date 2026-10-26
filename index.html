@@ -54,6 +54,19 @@
   .field input:focus, .field textarea:focus, .field select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-tint);}
   .panel-actions{display:flex;gap:10px;margin-top:18px;justify-content:flex-end;}
 
+  /* Scan attachments (form) */
+  .scan-box{border:1px dashed var(--line-strong);border-radius:6px;background:var(--paper);padding:12px 14px;}
+  .scan-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .scan-opt{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-soft);margin-left:auto;text-transform:none;letter-spacing:0;font-weight:400;margin-bottom:0 !important;}
+  .scan-opt input{width:auto !important;}
+  .scan-previews{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
+  .scan-previews:empty{display:none;}
+  .scan-prev{position:relative;width:86px;height:110px;border:1px solid var(--line-strong);border-radius:5px;overflow:hidden;background:#fff;cursor:pointer;}
+  .scan-prev img{width:100%;height:100%;object-fit:cover;display:block;}
+  .scan-prev .x{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;border:none;background:rgba(36,34,32,.8);color:#fff;font-size:12px;line-height:20px;cursor:pointer;padding:0;}
+  .scan-prev .x:hover{background:var(--red);}
+  .scan-hint{font-size:11.5px;color:var(--ink-faint);margin-top:8px;}
+
   .ticket-list{display:flex;flex-direction:column;gap:10px;}
   .ticket{background:var(--card);border:1px solid var(--line);border-radius:8px;display:grid;grid-template-columns:64px 1fr auto;gap:0;position:relative;overflow:hidden;}
   .ticket-id{background:var(--paper-2);border-right:1px dashed var(--line-strong);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;}
@@ -66,12 +79,16 @@
   .badge-type{background:var(--paper-2);color:var(--ink-soft);border:1px solid var(--line-strong);}
   .badge-status-pending{background:var(--amber-tint);color:var(--amber-dark);}
   .badge-status-done{background:var(--teal-tint);color:var(--teal-dark);}
+  .badge-scan{background:var(--teal-tint);color:var(--teal-dark);}
   .ticket-desc{font-size:13.5px;color:var(--ink);line-height:1.5;margin-bottom:8px;white-space:pre-line;}
   .ticket-meta{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);}
   .ticket-meta span{display:flex;align-items:center;gap:5px;}
   .ticket-meta b{color:var(--ink);font-weight:500;}
   .ticket-reco{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--teal-dark);}
   .ticket-reco b{font-weight:600;}
+  .scan-strip{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .scan-thumb{width:56px;height:72px;border:1px solid var(--line-strong);border-radius:4px;overflow:hidden;background:var(--paper-2);padding:0;cursor:zoom-in;}
+  .scan-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
   .ticket-actions{display:flex;flex-direction:column;gap:6px;padding:14px 14px 14px 0;align-items:flex-end;justify-content:center;}
   .icon-btn{width:30px;height:30px;border-radius:5px;border:1px solid var(--line-strong);background:var(--card);color:var(--ink-soft);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;}
   .icon-btn:hover{background:var(--paper-2);color:var(--ink);}
@@ -82,12 +99,27 @@
 
   .footnote{margin-top:26px;font-size:11.5px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;text-align:center;}
 
+  /* Lightbox */
+  .lightbox{position:fixed;inset:0;background:rgba(20,19,18,.92);display:none;flex-direction:column;z-index:50;}
+  .lightbox.open{display:flex;}
+  .lb-bar{display:flex;align-items:center;gap:10px;padding:12px 18px;color:#F5F2EA;font-family:'IBM Plex Mono',monospace;font-size:12px;}
+  .lb-bar .t{flex:1;}
+  .lb-bar .btn{background:transparent;color:#F5F2EA;border-color:rgba(245,242,234,.35);}
+  .lb-bar .btn:hover{background:rgba(245,242,234,.12);}
+  .lb-stage{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;position:relative;padding:0 56px 20px;}
+  .lb-stage img{max-width:100%;max-height:100%;object-fit:contain;border-radius:3px;background:#fff;}
+  .lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;border:1px solid rgba(245,242,234,.35);background:rgba(20,19,18,.6);color:#F5F2EA;font-size:20px;cursor:pointer;}
+  .lb-nav.prev{left:8px;} .lb-nav.next{right:8px;}
+  .lb-nav:hover{background:rgba(245,242,234,.15);}
+
   @media (max-width:640px){
     .stats{grid-template-columns:repeat(2,1fr);}
     .form-grid{grid-template-columns:1fr;}
     .ticket{grid-template-columns:40px 1fr;}
     .ticket-actions{grid-column:1/-1;flex-direction:row;justify-content:flex-end;padding:0 14px 12px;}
     .ticket-id .num{display:none;}
+    .scan-opt{margin-left:0;width:100%;}
+    .lb-stage{padding:0 8px 16px;}
   }
 </style>
 </head>
@@ -172,6 +204,20 @@
         <label>Remarks (final)</label>
         <textarea id="f-remarks2" placeholder="Any closing remarks"></textarea>
       </div>
+      <div class="field full">
+        <label>Scanned pictures</label>
+        <div class="scan-box">
+          <div class="scan-actions">
+            <button type="button" class="btn btn-small" id="scan-camera-btn">&#128247; Scan with camera</button>
+            <button type="button" class="btn btn-small" id="scan-upload-btn">&#128193; Upload image(s)</button>
+            <label class="scan-opt"><input type="checkbox" id="scan-enhance" checked> Enhance as document scan (B&amp;W, higher contrast)</label>
+          </div>
+          <input type="file" id="scan-camera" accept="image/*" capture="environment" style="display:none">
+          <input type="file" id="scan-upload" accept="image/*" multiple style="display:none">
+          <div class="scan-previews" id="scan-previews"></div>
+          <div class="scan-hint">Photos are resized and compressed automatically. Tap a thumbnail to view it full size.</div>
+        </div>
+      </div>
     </div>
     <div class="panel-actions">
       <button class="btn btn-ghost" id="cancel-btn">Cancel</button>
@@ -188,9 +234,30 @@
   <div class="footnote" id="footnote">Data saved automatically</div>
 </div>
 
+<div class="lightbox" id="lightbox">
+  <div class="lb-bar">
+    <div class="t" id="lb-title"></div>
+    <a class="btn btn-small" id="lb-download" download="scan.jpg">Download</a>
+    <button class="btn btn-small" id="lb-close">Close &#10005;</button>
+  </div>
+  <div class="lb-stage">
+    <button class="lb-nav prev" id="lb-prev" aria-label="Previous">&#8249;</button>
+    <img id="lb-img" alt="Scanned document">
+    <button class="lb-nav next" id="lb-next" aria-label="Next">&#8250;</button>
+  </div>
+</div>
+
 <script>
 let tickets = [];
 let editingId = null;
+
+/* ---------- Scan state ---------- */
+// Pending scans in the open form: {id, data, isNew}
+let formScans = [];
+let removedScanIds = [];
+const scanCache = {}; // scanId -> dataURL
+const SCAN_MAX_DIM = 1400;
+const SCAN_QUALITY = 0.72;
 
 function fmtDT(v){
   if(!v) return '';
@@ -211,6 +278,29 @@ setInterval(updateClock, 30000);
 
 const hasCloudStorage = (typeof window.storage !== 'undefined' && window.storage && typeof window.storage.get === 'function');
 const LOCAL_KEY = 'doc_transmittal_log_v1';
+
+/* ---------- Generic storage helpers ---------- */
+async function storeGet(key, shared){
+  try{
+    if(hasCloudStorage){
+      const res = await window.storage.get(key, shared);
+      return res && res.value ? res.value : null;
+    }
+    return localStorage.getItem(key);
+  }catch(e){ return null; }
+}
+async function storeSet(key, value, shared){
+  if(hasCloudStorage){ await window.storage.set(key, value, shared); }
+  else { localStorage.setItem(key, value); }
+}
+async function storeDel(key, shared){
+  try{
+    if(hasCloudStorage){
+      if(typeof window.storage.delete === 'function') await window.storage.delete(key, shared);
+    } else { localStorage.removeItem(key); }
+  }catch(e){ /* ignore */ }
+}
+const scanKey = id => 'doc_scan_' + id;
 
 async function loadTickets(){
   try{
@@ -234,13 +324,93 @@ async function saveTickets(){
   }catch(e){ console.error('Storage error', e); }
 }
 
+async function getScan(id){
+  if(scanCache[id]) return scanCache[id];
+  const v = await storeGet(scanKey(id), true);
+  if(v) scanCache[id] = v;
+  return v;
+}
+
 function genId(){
   const n = tickets.length ? Math.max(...tickets.map(t=>t.seq||0)) + 1 : 1;
   return { seq:n, id: 'DOC-' + String(n).padStart(4,'0') };
 }
+function genScanId(){
+  return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+}
 
-function openForm(t){
+/* ---------- Image processing ---------- */
+function fileToImage(file){
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Not a readable image')); };
+    img.src = url;
+  });
+}
+async function processImage(file, enhance){
+  const img = await fileToImage(file);
+  let w = img.naturalWidth, h = img.naturalHeight;
+  const scale = Math.min(1, SCAN_MAX_DIM / Math.max(w, h));
+  w = Math.round(w * scale); h = Math.round(h * scale);
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, w, h);
+  if(enhance && 'filter' in ctx) ctx.filter = 'grayscale(1) contrast(1.45) brightness(1.08)';
+  ctx.drawImage(img, 0, 0, w, h);
+  return canvas.toDataURL('image/jpeg', SCAN_QUALITY);
+}
+
+async function addScanFiles(fileList){
+  const enhance = document.getElementById('scan-enhance').checked;
+  const files = [...fileList].filter(f => f.type.startsWith('image/'));
+  if(!files.length){ alert('Please choose image files.'); return; }
+  for(const f of files){
+    try{
+      const data = await processImage(f, enhance);
+      formScans.push({ id: genScanId(), data, isNew: true });
+    }catch(e){
+      alert('Could not read "' + f.name + '" as an image.');
+    }
+  }
+  renderFormScans();
+}
+
+function renderFormScans(){
+  const box = document.getElementById('scan-previews');
+  box.innerHTML = formScans.map((s, i) => `
+    <div class="scan-prev" data-i="${i}">
+      <img src="${s.data}" alt="Scan ${i+1}">
+      <button type="button" class="x" data-rm="${i}" title="Remove" aria-label="Remove scan">&#10005;</button>
+    </div>`).join('');
+  box.querySelectorAll('.scan-prev').forEach(el => {
+    el.onclick = (e) => {
+      if(e.target.closest('.x')) return;
+      openLightboxFromList(formScans.map(s => s.data), +el.dataset.i, editingId || 'New entry');
+    };
+  });
+  box.querySelectorAll('.x').forEach(btn => {
+    btn.onclick = () => {
+      const s = formScans.splice(+btn.dataset.rm, 1)[0];
+      if(s && !s.isNew) removedScanIds.push(s.id);
+      renderFormScans();
+    };
+  });
+}
+
+document.getElementById('scan-camera-btn').onclick = () => document.getElementById('scan-camera').click();
+document.getElementById('scan-upload-btn').onclick = () => document.getElementById('scan-upload').click();
+document.getElementById('scan-camera').onchange = async (e) => { await addScanFiles(e.target.files); e.target.value = ''; };
+document.getElementById('scan-upload').onchange = async (e) => { await addScanFiles(e.target.files); e.target.value = ''; };
+
+/* ---------- Form ---------- */
+async function openForm(t){
   editingId = t ? t.id : null;
+  formScans = [];
+  removedScanIds = [];
   document.getElementById('form-title').textContent = t ? 'Edit entry ' + t.id : 'Log new document';
   document.getElementById('f-particulars').value = t ? t.particulars : '';
   document.getElementById('f-forwardedto').value = t ? t.forwardedTo : '';
@@ -249,12 +419,24 @@ function openForm(t){
   document.getElementById('f-receivedby').value = t ? t.receivedBy : '';
   document.getElementById('f-daterecv').value = t ? (t.dateRecv||'') : '';
   document.getElementById('f-remarks2').value = t ? (t.remarks2||'') : '';
+  renderFormScans();
   document.getElementById('form-panel').classList.add('open');
   document.getElementById('f-particulars').focus();
+  if(t && t.scanIds && t.scanIds.length){
+    for(const id of t.scanIds){
+      const data = await getScan(id);
+      if(editingId !== t.id) return; // form changed while loading
+      if(data) formScans.push({ id, data, isNew: false });
+    }
+    renderFormScans();
+  }
 }
 function closeForm(){
   document.getElementById('form-panel').classList.remove('open');
   editingId = null;
+  formScans = [];
+  removedScanIds = [];
+  renderFormScans();
 }
 document.getElementById('new-btn').onclick = () => openForm(null);
 document.getElementById('cancel-btn').onclick = closeForm;
@@ -275,6 +457,29 @@ document.getElementById('save-btn').onclick = async () => {
     dateRecv: document.getElementById('f-daterecv').value || '',
     remarks2: document.getElementById('f-remarks2').value.trim()
   };
+
+  // Persist scans: write new ones, delete removed ones
+  const savedIds = [];
+  let storageFailed = false;
+  for(const s of formScans){
+    if(s.isNew){
+      try{
+        await storeSet(scanKey(s.id), s.data, true);
+        scanCache[s.id] = s.data;
+        savedIds.push(s.id);
+      }catch(e){
+        storageFailed = true;
+      }
+    } else {
+      savedIds.push(s.id);
+    }
+  }
+  for(const id of removedScanIds){ await storeDel(scanKey(id), true); delete scanCache[id]; }
+  data.scanIds = savedIds;
+  if(storageFailed){
+    alert('Some scans could not be saved because storage is full. The entry was saved with the scans that fit. Try removing old scans or exporting your data.');
+  }
+
   if(editingId){
     const idx = tickets.findIndex(t=>t.id===editingId);
     if(idx>-1) tickets[idx] = {...tickets[idx], ...data};
@@ -288,7 +493,11 @@ document.getElementById('save-btn').onclick = async () => {
 };
 
 async function deleteTicket(id){
-  if(!confirm("Delete this entry? This can't be undone.")) return;
+  if(!confirm("Delete this entry and its scans? This can't be undone.")) return;
+  const t = tickets.find(t=>t.id===id);
+  if(t && t.scanIds){
+    for(const sid of t.scanIds){ await storeDel(scanKey(sid), true); delete scanCache[sid]; }
+  }
   tickets = tickets.filter(t=>t.id!==id);
   await saveTickets();
   render();
@@ -296,6 +505,75 @@ async function deleteTicket(id){
 function editTicket(id){
   const t = tickets.find(t=>t.id===id);
   if(t) openForm(t);
+}
+
+/* ---------- Lightbox ---------- */
+let lb = { list: [], i: 0, title: '' };
+function openLightboxFromList(list, i, title){
+  if(!list.length) return;
+  lb = { list, i, title };
+  showLightbox();
+  document.getElementById('lightbox').classList.add('open');
+}
+function showLightbox(){
+  const src = lb.list[lb.i];
+  document.getElementById('lb-img').src = src;
+  document.getElementById('lb-title').textContent = lb.title + '  ·  scan ' + (lb.i+1) + ' of ' + lb.list.length;
+  const dl = document.getElementById('lb-download');
+  dl.href = src;
+  dl.download = (lb.title || 'scan').replace(/[^\w-]+/g,'_') + '-scan-' + (lb.i+1) + '.jpg';
+  const multi = lb.list.length > 1;
+  document.getElementById('lb-prev').style.display = multi ? '' : 'none';
+  document.getElementById('lb-next').style.display = multi ? '' : 'none';
+}
+function closeLightbox(){ document.getElementById('lightbox').classList.remove('open'); }
+function stepLightbox(d){
+  if(lb.list.length < 2) return;
+  lb.i = (lb.i + d + lb.list.length) % lb.list.length;
+  showLightbox();
+}
+document.getElementById('lb-close').onclick = closeLightbox;
+document.getElementById('lb-prev').onclick = () => stepLightbox(-1);
+document.getElementById('lb-next').onclick = () => stepLightbox(1);
+document.getElementById('lightbox').onclick = (e) => { if(e.target.id === 'lightbox' || e.target.classList.contains('lb-stage')) closeLightbox(); };
+document.addEventListener('keydown', (e) => {
+  if(!document.getElementById('lightbox').classList.contains('open')) return;
+  if(e.key === 'Escape') closeLightbox();
+  if(e.key === 'ArrowLeft') stepLightbox(-1);
+  if(e.key === 'ArrowRight') stepLightbox(1);
+});
+
+async function openTicketScans(ticketId, index){
+  const t = tickets.find(x => x.id === ticketId);
+  if(!t || !t.scanIds) return;
+  const list = [];
+  for(const id of t.scanIds){ const d = await getScan(id); if(d) list.push(d); }
+  openLightboxFromList(list, Math.min(index, list.length-1), t.id);
+}
+
+/* Fill the thumbnail strips after render */
+async function hydrateScanStrips(){
+  const strips = document.querySelectorAll('.scan-strip');
+  for(const strip of strips){
+    const t = tickets.find(x => x.id === strip.dataset.id);
+    if(!t || !t.scanIds) continue;
+    let i = 0;
+    for(const sid of t.scanIds){
+      const data = await getScan(sid);
+      if(!data || !strip.isConnected) { i++; continue; }
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'scan-thumb';
+      btn.title = 'View scan ' + (i+1);
+      const im = document.createElement('img');
+      im.src = data; im.alt = 'Scan ' + (i+1);
+      btn.appendChild(im);
+      const idx = i;
+      btn.onclick = () => openTicketScans(t.id, idx);
+      strip.appendChild(btn);
+      i++;
+    }
+  }
 }
 
 function computeStats(list, monthLabel){
@@ -374,6 +652,7 @@ function render(){
 
   list.innerHTML = filtered.map(t => {
     const isDone = !!t.dateRecv;
+    const nScans = (t.scanIds || []).length;
     return `
     <div class="ticket">
       <div class="ticket-id">
@@ -385,6 +664,7 @@ function render(){
           <span class="ticket-brand">${escapeHtml(t.forwardedTo)}</span>
           ${t.remarks1 ? `<span class="badge badge-type">${escapeHtml(t.remarks1)}</span>` : ''}
           <span class="badge ${isDone ? 'badge-status-done' : 'badge-status-pending'}">${isDone ? 'Received' : 'Awaiting receipt'}</span>
+          ${nScans ? `<span class="badge badge-scan">&#128247; ${nScans} scan${nScans===1?'':'s'}</span>` : ''}
         </div>
         <div class="ticket-desc">${escapeHtml(t.particulars)}</div>
         <div class="ticket-meta">
@@ -393,13 +673,15 @@ function render(){
           ${isDone ? `<span>Received: <b>${fmtDT(t.dateRecv)}</b></span>` : ''}
         </div>
         ${t.remarks2 ? `<div class="ticket-reco"><b>Remarks:</b> ${escapeHtml(t.remarks2)}</div>` : ''}
+        ${nScans ? `<div class="scan-strip" data-id="${t.id}"></div>` : ''}
       </div>
       <div class="ticket-actions">
-        <button class="icon-btn" onclick="editTicket('${t.id}')" title="Edit" aria-label="Edit entry">&#9998;</button>
+        <button class="icon-btn" onclick="editTicket('${t.id}')" title="Edit / add scans" aria-label="Edit entry">&#9998;</button>
         <button class="icon-btn danger" onclick="deleteTicket('${t.id}')" title="Delete" aria-label="Delete entry">&#128465;</button>
       </div>
     </div>`;
   }).join('');
+  hydrateScanStrips();
 }
 
 document.getElementById('search').oninput = render;
@@ -475,7 +757,8 @@ document.getElementById('import-file').onchange = async (e) => {
       dateFwd: idx.dateFwd>-1 ? normalizeDateTime(r[idx.dateFwd]) : '',
       receivedBy: idx.receivedBy>-1 ? (r[idx.receivedBy]||'').trim() : '',
       dateRecv: idx.dateRecv>-1 ? normalizeDateTime(r[idx.dateRecv]) : '',
-      remarks2: idx.remarks2>-1 ? (r[idx.remarks2]||'').trim() : ''
+      remarks2: idx.remarks2>-1 ? (r[idx.remarks2]||'').trim() : '',
+      scanIds: []
     });
   }
   if(imported.length === 0){ alert('No valid entries were found in this file.'); e.target.value=''; return; }
@@ -491,8 +774,9 @@ document.getElementById('import-file').onchange = async (e) => {
 };
 
 function buildCSV(){
-  const headers = ['Particulars','Forwarded To','Remarks','Date & Time Forwarded','Received By','Date & Time Received','Remarks','Status'];
-  const rows = tickets.map(t => [t.particulars,t.forwardedTo,t.remarks1,t.dateFwd,t.receivedBy,t.dateRecv,t.remarks2,(t.dateRecv?'Received':'Pending')]);
+  // Note: scan images are not included in the CSV, only a count of how many are attached.
+  const headers = ['Particulars','Forwarded To','Remarks','Date & Time Forwarded','Received By','Date & Time Received','Remarks','Status','Scans Attached'];
+  const rows = tickets.map(t => [t.particulars,t.forwardedTo,t.remarks1,t.dateFwd,t.receivedBy,t.dateRecv,t.remarks2,(t.dateRecv?'Received':'Pending'),(t.scanIds||[]).length]);
   const pendingCount = tickets.filter(t=>!t.dateRecv).length;
   const doneCount = tickets.filter(t=>t.dateRecv).length;
   const summaryRows = [[],['Total documents', tickets.length],['Pending', pendingCount],['Received', doneCount]];
